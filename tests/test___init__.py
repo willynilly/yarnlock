@@ -1,14 +1,14 @@
 import json
 from pathlib import Path
 
-import yarnlock
+from yarnlock import yarnlock_parse
 
 
 def test_parse_empty():
-    assert yarnlock.yarnlock_parse('') == {}
+    assert yarnlock_parse('') == {}
 
 
 def test_parse():
-    contents = Path('tests/yarn.lock').read_text()
-    with Path('tests/yarn.lock.json').open('w') as f:
-        json.dump(yarnlock.yarnlock_parse(contents), f, indent=2)
+    yarnlock = Path('tests/yarn.lock').read_text()
+    yarnlock_expected = json.loads(Path('tests/yarn.lock.json').read_bytes())
+    assert yarnlock_parse(yarnlock) == yarnlock_expected

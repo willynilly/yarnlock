@@ -18,9 +18,9 @@ classifiers = [
   "Typing :: Typed",
 ]
 dependencies = []
-description = "OpenStreetMap shortlink encoder and decoder"
+description = "yarn.lock file parser"
 dynamic = ["version"]
-keywords = ["openstreetmap", "osm", "shortlink", "encoder", "decoder", "url"]
+keywords = ["yarn", "lock", "yarnlock", "parser", "yarn2dict"]
 name = "yarnlock"
 readme = "README.md"
 requires-python = ">=3.8"
