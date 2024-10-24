@@ -2,7 +2,7 @@
 
 let
   # Update packages with `nixpkgs-update` command
-  pkgs = import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/45508c1098a3fb7140ae3d86414cee8f5ee7511c.tar.gz") { };
+  pkgs = import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/cabaf14d3e69c9921d7acedf5d7d60bb2b90be02.tar.gz") { };
 
   packages' = with pkgs; [
     coreutils
