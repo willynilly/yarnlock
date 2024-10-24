@@ -1,14 +1,14 @@
 [package]
 edition = "2021"
 name = "yarnlock"
-version = "1.0.0"
+version = "1.0.1"
 
 [lib]
 crate-type = ["cdylib"]
 name = "yarnlock"
 
 [dependencies]
-pyo3 = {version = "0.22.2", features = ["extension-module", "abi3-py38"]}
+pyo3 = { version = "0.22.2", features = ["abi3-py38", "extension-module"] }
 
 [profile.release]
 overflow-checks = true

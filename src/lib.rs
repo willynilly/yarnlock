@@ -36,6 +36,10 @@ fn yarnlock_parse<'py>(py: Python<'py>, yarnlock: &str) -> PyResult<Bound<'py, P
     {
         let line_tab_size = tab_size(line);
         let line = line.trim();
+        if line.is_empty() {
+            continue;
+        }
+
         if line_tab_size == 0 {
             // new dependency
             this_dict = Some(parse_dependency(py, &result, line)?);
