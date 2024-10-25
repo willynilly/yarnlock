@@ -70,7 +70,7 @@ jobs:
 
       - name: Run tests
         run: |
-          nix-shell --pure --run run-tests
+          nix-shell --run run-tests
 
       - name: Export Nix store cache
         if: steps.nix-cache.outputs.cache-hit != 'true'
