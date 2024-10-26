@@ -22,7 +22,7 @@ dynamic = ["version"]
 keywords = ["lock", "parser", "yarn", "yarn2dict", "yarnlock"]
 name = "yarnlock"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 
 [project.urls]
 Issues = "https://github.com/Zaczero/yarnlock/issues"
