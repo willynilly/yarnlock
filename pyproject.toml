@@ -25,34 +25,24 @@ readme = "README.md"
 requires-python = ">=3.9"
 
 [project.urls]
-Issues = "https://github.com/Zaczero/yarnlock/issues"
+Issues     = "https://github.com/Zaczero/yarnlock/issues"
 Repository = "https://github.com/Zaczero/yarnlock"
 
 [build-system]
 build-backend = "maturin"
-requires = ["maturin>=1.7,<2.0"]
+requires      = ["maturin>=1.7,<2.0"]
 
 [tool.maturin]
-features = ["pyo3/extension-module"]
-module-name = "yarnlock._lib"
+features      = ["pyo3/extension-module"]
+module-name   = "yarnlock._lib"
 python-source = "python"
 
 [tool.uv]
 dev-dependencies = ["pytest"]
 
 [tool.ruff]
-exclude = [
-  ".direnv",
-  ".git",
-  ".github",
-  ".pytest_cache",
-  ".ruff_cache",
-  ".venv",
-  ".vscode",
-]
-
-indent-width = 4
-line-length = 120
+indent-width   = 4
+line-length    = 88
 target-version = "py39"
 
 [tool.ruff.lint]
@@ -121,17 +111,13 @@ select = [
   "YTT",   # flake8-2020
 ]
 
-# allow fix for all enabled rules (when `--fix`) is provided.
-fixable = ["ALL"]
+fixable   = ["ALL"]
 unfixable = []
 
-# allow unused variables when underscore-prefixed.
-dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
-
 [tool.ruff.format]
-indent-style = "space"
-line-ending = "lf"
-quote-style = "single"
+indent-style              = "space"
+line-ending               = "lf"
+quote-style               = "single"
 skip-magic-trailing-comma = false
 
 [tool.ruff.lint.flake8-builtins]
@@ -139,19 +125,19 @@ builtins-ignorelist = ["input"]
 
 [tool.ruff.lint.flake8-quotes]
 docstring-quotes = "double"
-inline-quotes = "single"
+inline-quotes    = "single"
 multiline-quotes = "double"
 
 [tool.ruff.lint.pylint]
 max-args = 10
 
 [tool.pyright]
-include = ["python/yarnlock", "tests"]
+include        = ["python/yarnlock", "tests"]
 pythonPlatform = "All"
-pythonVersion = "3.9"
-strict = ["python/yarnlock"]
+pythonVersion  = "3.9"
+strict         = ["python/yarnlock"]
 
 [tool.pytest.ini_options]
-addopts = "--quiet"
+addopts    = "--quiet"
 minversion = "6.0"
-testpaths = ["tests"]
+testpaths  = ["tests"]

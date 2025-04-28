@@ -1,5 +1,7 @@
 use pyo3::exceptions::PyValueError;
+use pyo3::intern;
 use pyo3::prelude::*;
+use pyo3::types::PyString;
 use pyo3::types::{PyDict, PyList};
 
 fn tab_size(s: &str) -> usize {
@@ -21,17 +23,28 @@ fn trim_string(s: &str) -> &str {
         s
     }
 }
+struct InternKeys<'py> {
+    matches: &'py Bound<'py, PyString>,
+    dependencies: &'py Bound<'py, PyString>,
+    optional_dependencies: &'py Bound<'py, PyString>,
+}
 
 #[pyfunction]
 fn yarnlock_parse<'py>(py: Python<'py>, yarnlock: &str) -> PyResult<Bound<'py, PyDict>> {
-    let result = PyDict::new_bound(py);
+    // Intern common keys once
+    let keys = InternKeys {
+        matches: intern!(py, "matches"),
+        dependencies: intern!(py, "dependencies"),
+        optional_dependencies: intern!(py, "optionalDependencies"),
+    };
+
+    let result = PyDict::new(py);
     let mut file_tab_size: Option<usize> = None;
     let mut this_dict: Option<Bound<'py, PyDict>> = None;
     let mut this_subdict: Option<Bound<'py, PyDict>> = None;
 
     for line in yarnlock
         .lines()
-        .into_iter()
         .filter(|line| !line.is_empty() && !line.starts_with('#'))
     {
         let line_tab_size = tab_size(line);
@@ -42,7 +55,7 @@ fn yarnlock_parse<'py>(py: Python<'py>, yarnlock: &str) -> PyResult<Bound<'py, P
 
         if line_tab_size == 0 {
             // new dependency
-            this_dict = Some(parse_dependency(py, &result, line)?);
+            this_dict = Some(parse_dependency(py, &result, line, &keys)?);
             continue;
         }
 
@@ -59,7 +72,7 @@ fn yarnlock_parse<'py>(py: Python<'py>, yarnlock: &str) -> PyResult<Bound<'py, P
                 None => {
                     return Err(PyValueError::new_err(format!(
                         "Attempted to set property '{line}' before defining dependency"
-                    )))
+                    )));
                 }
             }
         } else if line_tab_size == file_tab_size * 2 {
@@ -70,7 +83,7 @@ fn yarnlock_parse<'py>(py: Python<'py>, yarnlock: &str) -> PyResult<Bound<'py, P
                 None => {
                     return Err(PyValueError::new_err(format!(
                         "Attempted to set sub-property '{line}' before defining property"
-                    )))
+                    )));
                 }
             }
         }
@@ -83,24 +96,25 @@ fn parse_dependency<'py>(
     py: Python<'py>,
     result: &Bound<'py, PyDict>,
     line: &str,
+    keys: &InternKeys<'py>,
 ) -> PyResult<Bound<'py, PyDict>> {
     match match_colon(line) {
         Some(line) => {
-            let this_dict_ = PyDict::new_bound(py);
+            let this_dict = PyDict::new(py);
             let mut this_matches = Vec::new();
             let mut root_set: bool = false;
 
             let full_key = line.trim_end_matches(':');
 
             // Set an item with the full dependency key
-            result.set_item(full_key.to_string(), &this_dict_).unwrap();
+            result.set_item(full_key.to_string(), &this_dict).unwrap();
 
             for component in full_key.split(", ") {
                 match trim_string(component).rsplit_once('@') {
                     Some((name, version)) => {
                         if !root_set {
                             // Set an item with just the package name
-                            result.set_item(name.to_string(), &this_dict_).unwrap();
+                            result.set_item(name.to_string(), &this_dict).unwrap();
                             root_set = true;
                         }
                         this_matches.push(version.to_string());
@@ -108,22 +122,24 @@ fn parse_dependency<'py>(
                     None => {
                         return Err(PyValueError::new_err(format!(
                             "Invalid dependency line: {line}"
-                        )))
+                        )));
                     }
                 }
             }
 
             assert!(root_set);
-            this_dict_
-                .set_item("matches", PyList::new_bound(py, this_matches))
+
+            this_dict
+                .set_item(keys.matches, PyList::new(py, this_matches).unwrap())
                 .unwrap();
-            this_dict_
-                .set_item("dependencies", PyDict::new_bound(py))
+            this_dict
+                .set_item(keys.dependencies, PyDict::new(py))
                 .unwrap();
-            this_dict_
-                .set_item("optionalDependencies", PyDict::new_bound(py))
+            this_dict
+                .set_item(keys.optional_dependencies, PyDict::new(py))
                 .unwrap();
-            Ok(this_dict_)
+
+            Ok(this_dict)
         }
         None => Err(PyValueError::new_err(format!(
             "Invalid dependency line: {line}"
@@ -139,7 +155,7 @@ fn parse_property<'py>(
 ) -> PyResult<()> {
     match match_colon(line) {
         Some(key) => {
-            *this_subdict = Some(PyDict::new_bound(py));
+            *this_subdict = Some(PyDict::new(py));
             this_dict
                 .set_item(trim_string(key).to_string(), this_subdict.as_ref())
                 .unwrap();
