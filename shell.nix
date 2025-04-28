@@ -2,7 +2,7 @@
 
 let
   # Update packages with `nixpkgs-update` command
-  pkgs = import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/41dea55321e5a999b17033296ac05fe8a8b5a257.tar.gz") { };
+  pkgs = import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/507b63021ada5fee621b6ca371c4fca9ca46f52c.tar.gz") { };
 
   packages' = with pkgs; [
     coreutils
@@ -31,6 +31,7 @@ let
 
   shell' = with pkgs; lib.optionalString isDevelopment ''
     export PYTHONNOUSERSITE=1
+    export PYTHONPATH=""
     export TZ=UTC
 
     current_python=$(readlink -e .venv/bin/python || echo "")
@@ -38,7 +39,7 @@ let
     [ "$current_python" != "${python313}" ] && rm -rf .venv/
 
     echo "Installing Python dependencies"
-    echo "${python313}/bin/python" > .python-version
+    export UV_PYTHON="${python313}/bin/python"
     NIX_ENFORCE_PURITY=0 uv sync --frozen
 
     echo "Activating Python virtual environment"
