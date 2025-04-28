@@ -23,6 +23,7 @@ fn trim_string(s: &str) -> &str {
         s
     }
 }
+
 struct InternKeys<'py> {
     matches: &'py Bound<'py, PyString>,
     dependencies: &'py Bound<'py, PyString>,
@@ -107,17 +108,26 @@ fn parse_dependency<'py>(
             let full_key = line.trim_end_matches(':');
 
             // Set an item with the full dependency key
-            result.set_item(full_key.to_string(), &this_dict).unwrap();
+            result
+                .set_item(
+                    if !full_key.contains(',') {
+                        trim_string(full_key)
+                    } else {
+                        full_key
+                    },
+                    &this_dict,
+                )
+                .unwrap();
 
             for component in full_key.split(", ") {
                 match trim_string(component).rsplit_once('@') {
                     Some((name, version)) => {
                         if !root_set {
                             // Set an item with just the package name
-                            result.set_item(name.to_string(), &this_dict).unwrap();
+                            result.set_item(name, &this_dict).unwrap();
                             root_set = true;
                         }
-                        this_matches.push(version.to_string());
+                        this_matches.push(version);
                     }
                     None => {
                         return Err(PyValueError::new_err(format!(
@@ -157,14 +167,14 @@ fn parse_property<'py>(
         Some(key) => {
             *this_subdict = Some(PyDict::new(py));
             this_dict
-                .set_item(trim_string(key).to_string(), this_subdict.as_ref())
+                .set_item(trim_string(key), this_subdict.as_ref())
                 .unwrap();
             Ok(())
         }
         None => match line.split_once(' ') {
             Some((key, val)) => {
                 this_dict
-                    .set_item(trim_string(key).to_string(), trim_string(val).to_string())
+                    .set_item(trim_string(key), trim_string(val))
                     .unwrap();
                 Ok(())
             }
@@ -179,7 +189,7 @@ fn parse_sub_property<'py>(this_subdict: &Bound<'py, PyDict>, line: &str) -> PyR
     match line.split_once(' ') {
         Some((key, val)) => {
             this_subdict
-                .set_item(trim_string(key).to_string(), trim_string(val).to_string())
+                .set_item(trim_string(key), trim_string(val))
                 .unwrap();
             Ok(())
         }
