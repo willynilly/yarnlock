@@ -90,10 +90,16 @@ fn parse_dependency<'py>(
             let mut this_matches = Vec::new();
             let mut root_set: bool = false;
 
-            for component in line.trim_end_matches(':').split(", ") {
+            let full_key = line.trim_end_matches(':');
+
+            // Set an item with the full dependency key
+            result.set_item(full_key.to_string(), &this_dict_).unwrap();
+
+            for component in full_key.split(", ") {
                 match trim_string(component).rsplit_once('@') {
                     Some((name, version)) => {
                         if !root_set {
+                            // Set an item with just the package name
                             result.set_item(name.to_string(), &this_dict_).unwrap();
                             root_set = true;
                         }
